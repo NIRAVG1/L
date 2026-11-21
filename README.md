@@ -118,16 +118,18 @@ Implemented in the Codex desktop workspace. No deployment or external service wa
 
 `make up` builds and starts the multi-stage backend and frontend images when Docker is running. `make down` stops the stack.
 
-Deployment files are ready: [`frontend/vercel.json`](frontend/vercel.json) configures the Vite build and SPA fallback, and [`render.yaml`](render.yaml) defines the Docker backend, `/health` check, `/data` persistent disk, and required environment variables. Render's Docker service uses `./backend` as its build context.
+Deployment files are ready: [`frontend/vercel.json`](frontend/vercel.json) configures the Vite build and SPA fallback, [`backend/main.py`](backend/main.py) and [`backend/pyproject.toml`](backend/pyproject.toml) expose FastAPI to Vercel's Python runtime, and [`render.yaml`](render.yaml) defines the Docker backend and persistent disk.
 
 To deploy after connecting this directory to a GitHub repository:
 
-1. In Render, create a Blueprint from the repository and use `render.yaml`. Supply `LLM_API_KEYS` as a secret and initially set `ALLOWED_ORIGINS` to `http://localhost:3000`. The service uses `DATABASE_URL=sqlite:////data/app.db` and keeps SQLite on its persistent disk. Choose a Render plan that supports persistent disks.
-2. In Vercel, import the same repository and set the project root to `frontend`. Add `VITE_API_URL` using the Render service's HTTPS origin, then deploy.
-3. Replace Render's `ALLOWED_ORIGINS` with the deployed Vercel site origin and redeploy the backend.
-4. Check `https://<render-service>/health`, then send a chat from the Vercel site. Replace these angle-bracket examples with the provider URLs; no production URLs exist yet.
+1. Create a managed PostgreSQL database and copy its connection URL. Vercel Functions have no persistent local filesystem, so SQLite is for local/Docker use only in this deployment.
+2. In Vercel, import the repository as a backend project with project root `backend`. Set `LLM_API_KEYS` as a secret, `LLM_MODEL=openai/gpt-4o-mini`, `DATABASE_URL` to the PostgreSQL URL, and `ENABLE_FAILURE_SIMULATION=false`. Vercel detects the FastAPI entry point from `backend/pyproject.toml`.
+3. Import the same repository as a separate frontend project with project root `frontend`. Set `VITE_API_URL` to the backend's HTTPS origin, then deploy.
+4. Set the backend's `ALLOWED_ORIGINS` to the deployed frontend origin and redeploy the backend. Check the backend `/health` endpoint, then send a chat from the frontend.
 
-Never put API keys in `render.yaml`, `vercel.json`, or the Vercel frontend environment. The frontend only needs the public backend URL. See [Render Blueprint reference](https://render.com/docs/blueprint-spec), [Render persistent disks](https://render.com/docs/disks), and [Vercel project configuration](https://vercel.com/docs/project-configuration/vercel-json).
+The Render path remains available for a Docker deployment: create a Blueprint from the repository using `render.yaml`, provide the API keys and CORS origin, and choose a plan with persistent-disk support. No production URLs exist yet.
+
+Never put API keys in deployment files or the Vercel frontend environment. The frontend only needs the public backend URL. See [Render Blueprint reference](https://render.com/docs/blueprint-spec), [Render persistent disks](https://render.com/docs/disks), and [Vercel's FastAPI deployment guide](https://vercel.com/kb/guide/ship-a-fastapi-app-on-vercel).
 
 ### Known limitations
 
