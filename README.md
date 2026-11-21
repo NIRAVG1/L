@@ -123,7 +123,7 @@ Deployment files are ready: [`frontend/vercel.json`](frontend/vercel.json) confi
 To deploy after connecting this directory to a GitHub repository:
 
 1. Create a managed PostgreSQL database and copy its connection URL. Vercel Functions have no persistent local filesystem, so SQLite is for local/Docker use only in this deployment.
-2. In Vercel, import the repository as a backend project with project root `backend`. Set `LLM_API_KEYS` as a secret, `LLM_MODEL=openai/gpt-4o-mini`, `DATABASE_URL` to the PostgreSQL URL, and `ENABLE_FAILURE_SIMULATION=false`. Vercel detects the FastAPI entry point from `backend/pyproject.toml`.
+2. In Vercel, import the repository as a backend project with project root `backend`. Set `LLM_API_KEYS` as a secret, `LLM_MODEL=openai/gpt-4o-mini`, and `ENABLE_FAILURE_SIMULATION=false`. Connect Neon using the `DATABASE` prefix; the backend reads the injected `DATABASE_POSTGRES_URL`. Vercel detects the FastAPI entry point from `backend/pyproject.toml`.
 3. Import the same repository as a separate frontend project with project root `frontend`. Set `VITE_API_URL` to the backend's HTTPS origin, then deploy.
 4. Set the backend's `ALLOWED_ORIGINS` to the deployed frontend origin and redeploy the backend. Check the backend `/health` endpoint, then send a chat from the frontend.
 

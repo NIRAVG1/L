@@ -1,7 +1,7 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import declarative_base, sessionmaker
 from .config import settings
-database_url = settings.database_url
+database_url = settings.effective_database_url
 if database_url.startswith('postgres://'):
     database_url = 'postgresql+psycopg://' + database_url.removeprefix('postgres://')
 elif database_url.startswith('postgresql://'):
