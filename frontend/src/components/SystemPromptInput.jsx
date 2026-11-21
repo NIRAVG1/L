@@ -1,0 +1,2 @@
+import {useState} from 'react';import {SlidersHorizontal} from 'lucide-react';
+export default function SystemPromptInput({value,onChange}){const [open,setOpen]=useState(false);return <div className="prompt-control"><button className="prompt-toggle" onClick={()=>setOpen(!open)}><SlidersHorizontal size={15}/>{open?'Hide instructions':'Customize assistant'}</button>{open&&<textarea data-testid="system-prompt-input" value={value} onChange={e=>onChange(e.target.value)} placeholder="Optional: set instructions for this conversation" rows={2}/>}</div>}
